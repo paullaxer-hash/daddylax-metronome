@@ -146,15 +146,15 @@ class MetronomeApp {
         this.saveSettings();
     }
     
-    togglePlayback() {
+    async togglePlayback() {
         if (this.isPlaying) {
             this.stop();
         } else {
-            this.start();
+            await this.start();
         }
     }
     
-    start() {
+    async start() {
         this.engine.updateSettings({
             bpm: this.bpm,
             timeSignature: parseInt(this.timeSignatureEl.value),
@@ -166,7 +166,7 @@ class MetronomeApp {
             beatFrequency: parseFloat(this.beatFrequencyEl.value)
         });
         
-        this.engine.start();
+        await this.engine.start();
         this.isPlaying = true;
         
         // Update UI
@@ -287,7 +287,7 @@ class MetronomeApp {
                 const settings = JSON.parse(saved);
                 this.bpm = settings.bpm || 120;
                 this.timeSignatureEl.value = settings.timeSignature || 4;
-                this.subdivisionEl.value = settings.subdivision || 0.25;
+                this.subdivisionEl.value = settings.subdivision || 1.0;
                 this.accentToggleEl.checked = settings.accentOnDownbeat || false;
                 this.soundToggleEl.checked = settings.soundEnabled !== false;
                 this.hapticsToggleEl.checked = settings.hapticsEnabled || false;
@@ -306,8 +306,5 @@ class MetronomeApp {
     }
 }
 
-// Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.app = new MetronomeApp();
-});
+// App initialization is handled in index.html for Safari compatibility
 

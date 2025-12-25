@@ -5,7 +5,7 @@ class MetronomeEngine {
         this.isPlaying = false;
         this.bpm = 120;
         this.timeSignature = 4;
-        this.subdivision = 0.25; // quarter note
+        this.subdivision = 1.0; // quarter note (multiplier: 1.0 = quarter, 2.0 = eighth, 1.5 = triplet, 4.0 = sixteenth)
         this.accentOnDownbeat = false;
         this.soundEnabled = true;
         this.clickSoundType = 'classic';
@@ -32,27 +32,52 @@ class MetronomeEngine {
     
     initAudioContext() {
         try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // Use webkitAudioContext for Safari compatibility
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) {
+                console.error('Web Audio API not supported');
+                return;
+            }
+            this.audioContext = new AudioContextClass();
         } catch (e) {
-            console.error('Web Audio API not supported:', e);
+            console.error('Failed to create audio context:', e);
         }
     }
     
-    start() {
+    async start() {
         if (this.isPlaying) return;
-        if (!this.audioContext) this.initAudioContext();
+        if (!this.audioContext) {
+            this.initAudioContext();
+            if (!this.audioContext) {
+                console.error('Cannot start: audio context not available');
+                return;
+            }
+        }
         
-        // Resume audio context if suspended (required by some browsers)
+        // Resume audio context if suspended (required by Safari and some browsers)
+        // Safari requires user interaction before audio can play
         if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
+            try {
+                await this.audioContext.resume();
+                // Wait a bit for the context to fully resume
+                if (this.audioContext.state !== 'running') {
+                    console.warn('Audio context not running after resume');
+                }
+            } catch (e) {
+                console.error('Failed to resume audio context:', e);
+                return;
+            }
         }
         
         this.isPlaying = true;
         this.beatNumber = 0;
         
         // Calculate beat interval
-        const beatsPerSecond = (this.bpm / 60.0) * (1.0 / this.subdivision);
-        this.beatInterval = 1.0 / beatsPerSecond;
+        // subdivision is a multiplier: 1.0 = quarter, 2.0 = eighth, 1.5 = triplet, 4.0 = sixteenth
+        // This represents how many subdivision beats fit in one quarter note
+        const quarterNotesPerSecond = this.bpm / 60.0;
+        const subdivisionBeatsPerSecond = quarterNotesPerSecond * this.subdivision;
+        this.beatInterval = 1.0 / subdivisionBeatsPerSecond;
         
         // Get current time and schedule immediate click
         const currentTime = this.audioContext.currentTime;
@@ -93,7 +118,9 @@ class MetronomeEngine {
         
         // Schedule beats ahead
         while (this.nextBeatTime < currentTime + this.scheduleAheadTime) {
-            const beatsPerBar = this.timeSignature * (1.0 / this.subdivision);
+            // Calculate beats per bar: timeSignature is quarter notes per bar
+            // subdivision multiplier tells us how many subdivision beats per quarter note
+            const beatsPerBar = this.timeSignature * this.subdivision;
             const beatIndexInBar = ((this.beatNumber - 1) % beatsPerBar) + 1;
             const isDownbeat = (beatIndexInBar === 1) && this.accentOnDownbeat;
             
@@ -257,8 +284,9 @@ class MetronomeEngine {
         this.bpm = newBPM;
         if (this.isPlaying) {
             // Recalculate beat interval
-            const beatsPerSecond = (this.bpm / 60.0) * (1.0 / this.subdivision);
-            this.beatInterval = 1.0 / beatsPerSecond;
+            const quarterNotesPerSecond = this.bpm / 60.0;
+            const subdivisionBeatsPerSecond = quarterNotesPerSecond * this.subdivision;
+            this.beatInterval = 1.0 / subdivisionBeatsPerSecond;
             // Don't reset beatNumber - preserve measure position
         }
     }

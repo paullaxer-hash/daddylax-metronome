@@ -44,10 +44,10 @@
             <div class="control-group">
                 <label>Subdiv</label>
                 <select id="subdivision" class="control-select">
-                    <option value="0.25">Quarter</option>
-                    <option value="0.5">Eighth</option>
-                    <option value="0.333">Triplet</option>
-                    <option value="0.125">Sixteenth</option>
+                    <option value="1.0">Quarter</option>
+                    <option value="2.0">Eighth</option>
+                    <option value="1.5">Triplet</option>
+                    <option value="4.0">Sixteenth</option>
                 </select>
             </div>
             <div class="control-group">
@@ -187,14 +187,41 @@
     <script src="app.js"></script>
     
     <script>
-        // Register service worker for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+        // Initialize app
+        let app;
+        
+        function initApp() {
+            if (!app) {
+                app = new MetronomeApp();
+                window.app = app; // Make available globally
+            }
+        }
+        
+        // Initialize on load (works in Chrome and most browsers)
+        window.addEventListener('load', () => {
+            initApp();
+            
+            // Register service worker for PWA
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('service-worker.js')
                     .then(reg => console.log('Service Worker registered'))
                     .catch(err => console.log('Service Worker registration failed:', err));
-            });
-        }
+            }
+        });
+        
+        // Safari fallback: ensure audio context is initialized on first user interaction
+        // This is required because Safari suspends audio context until user interaction
+        document.addEventListener('click', () => {
+            if (app && app.engine && app.engine.audioContext && app.engine.audioContext.state === 'suspended') {
+                app.engine.audioContext.resume().catch(err => console.error('Failed to resume audio:', err));
+            }
+        }, { once: true });
+        
+        document.addEventListener('touchstart', () => {
+            if (app && app.engine && app.engine.audioContext && app.engine.audioContext.state === 'suspended') {
+                app.engine.audioContext.resume().catch(err => console.error('Failed to resume audio:', err));
+            }
+        }, { once: true });
     </script>
 </body>
 </html>
