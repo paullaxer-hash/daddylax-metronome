@@ -122,35 +122,35 @@ class MetronomeEngine {
         const frequency = isDownbeat ? this.accentFrequency : this.beatFrequency;
         const duration = isDownbeat ? 0.05 : 0.04;
         
-        // Generate click sound based on type
+        // Generate click sound based on type - pass startTime for proper scheduling
         switch (this.clickSoundType) {
             case 'classic':
-                this.createClassicClick(oscillator, gainNode, frequency, duration, isDownbeat);
+                this.createClassicClick(oscillator, gainNode, frequency, duration, isDownbeat, time);
                 break;
             case 'rimShot':
-                this.createRimShotClick(oscillator, gainNode, frequency, duration, isDownbeat);
+                this.createRimShotClick(oscillator, gainNode, frequency, duration, isDownbeat, time);
                 break;
             case 'woodblock':
-                this.createWoodblockClick(oscillator, gainNode, frequency, duration, isDownbeat);
+                this.createWoodblockClick(oscillator, gainNode, frequency, duration, isDownbeat, time);
                 break;
             case 'stick':
-                this.createStickClick(oscillator, gainNode, frequency, duration, isDownbeat);
+                this.createStickClick(oscillator, gainNode, frequency, duration, isDownbeat, time);
                 break;
             case 'electronic':
-                this.createElectronicClick(oscillator, gainNode, frequency, duration, isDownbeat);
+                this.createElectronicClick(oscillator, gainNode, frequency, duration, isDownbeat, time);
                 break;
             case 'bell':
-                this.createBellClick(oscillator, gainNode, frequency, duration, isDownbeat);
+                this.createBellClick(oscillator, gainNode, frequency, duration, isDownbeat, time);
                 break;
             default:
-                this.createClassicClick(oscillator, gainNode, frequency, duration, isDownbeat);
+                this.createClassicClick(oscillator, gainNode, frequency, duration, isDownbeat, time);
         }
         
         oscillator.start(time);
         oscillator.stop(time + duration);
     }
     
-    createClassicClick(oscillator, gainNode, frequency, duration, isDownbeat) {
+    createClassicClick(oscillator, gainNode, frequency, duration, isDownbeat, startTime) {
         oscillator.type = 'sine';
         oscillator.frequency.value = frequency;
         
@@ -160,15 +160,15 @@ class MetronomeEngine {
         const sustainLevel = 0.1;
         const releaseTime = 0.015;
         
-        const now = this.audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(amplitude, now + attackTime);
-        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, now + attackTime + decayTime);
-        gainNode.gain.setValueAtTime(amplitude * sustainLevel, now + duration - releaseTime);
-        gainNode.gain.linearRampToValueAtTime(0, now + duration);
+        // Schedule envelope relative to startTime, not currentTime
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+        gainNode.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration - releaseTime);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
     }
     
-    createRimShotClick(oscillator, gainNode, frequency, duration, isDownbeat) {
+    createRimShotClick(oscillator, gainNode, frequency, duration, isDownbeat, startTime) {
         oscillator.type = 'sine';
         oscillator.frequency.value = frequency;
         
@@ -178,15 +178,14 @@ class MetronomeEngine {
         const sustainLevel = 0.05;
         const releaseTime = 0.01;
         
-        const now = this.audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(amplitude, now + attackTime);
-        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, now + attackTime + decayTime);
-        gainNode.gain.setValueAtTime(amplitude * sustainLevel, now + duration - releaseTime);
-        gainNode.gain.linearRampToValueAtTime(0, now + duration);
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+        gainNode.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration - releaseTime);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
     }
     
-    createWoodblockClick(oscillator, gainNode, frequency, duration, isDownbeat) {
+    createWoodblockClick(oscillator, gainNode, frequency, duration, isDownbeat, startTime) {
         oscillator.type = 'sine';
         oscillator.frequency.value = frequency;
         
@@ -196,15 +195,14 @@ class MetronomeEngine {
         const sustainLevel = 0.15;
         const releaseTime = 0.025;
         
-        const now = this.audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(amplitude, now + attackTime);
-        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, now + attackTime + decayTime);
-        gainNode.gain.setValueAtTime(amplitude * sustainLevel, now + duration - releaseTime);
-        gainNode.gain.linearRampToValueAtTime(0, now + duration);
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+        gainNode.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration - releaseTime);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
     }
     
-    createStickClick(oscillator, gainNode, frequency, duration, isDownbeat) {
+    createStickClick(oscillator, gainNode, frequency, duration, isDownbeat, startTime) {
         oscillator.type = 'sine';
         oscillator.frequency.value = frequency;
         
@@ -214,15 +212,14 @@ class MetronomeEngine {
         const sustainLevel = 0.0;
         const releaseTime = 0.005;
         
-        const now = this.audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(amplitude, now + attackTime);
-        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, now + attackTime + decayTime);
-        gainNode.gain.setValueAtTime(amplitude * sustainLevel, now + duration - releaseTime);
-        gainNode.gain.linearRampToValueAtTime(0, now + duration);
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+        gainNode.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration - releaseTime);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
     }
     
-    createElectronicClick(oscillator, gainNode, frequency, duration, isDownbeat) {
+    createElectronicClick(oscillator, gainNode, frequency, duration, isDownbeat, startTime) {
         oscillator.type = 'square';
         oscillator.frequency.value = frequency;
         
@@ -232,15 +229,14 @@ class MetronomeEngine {
         const sustainLevel = 0.05;
         const releaseTime = 0.01;
         
-        const now = this.audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(amplitude, now + attackTime);
-        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, now + attackTime + decayTime);
-        gainNode.gain.setValueAtTime(amplitude * sustainLevel, now + duration - releaseTime);
-        gainNode.gain.linearRampToValueAtTime(0, now + duration);
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+        gainNode.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration - releaseTime);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
     }
     
-    createBellClick(oscillator, gainNode, frequency, duration, isDownbeat) {
+    createBellClick(oscillator, gainNode, frequency, duration, isDownbeat, startTime) {
         oscillator.type = 'sine';
         oscillator.frequency.value = frequency;
         
@@ -250,12 +246,11 @@ class MetronomeEngine {
         const sustainLevel = 0.2;
         const releaseTime = 0.03;
         
-        const now = this.audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(amplitude, now + attackTime);
-        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, now + attackTime + decayTime);
-        gainNode.gain.setValueAtTime(amplitude * sustainLevel, now + duration - releaseTime);
-        gainNode.gain.linearRampToValueAtTime(0, now + duration);
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+        gainNode.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration - releaseTime);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
     }
     
     updateBPM(newBPM) {
