@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Professional metronome with customizable click sounds, tempo control, and time signatures">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Metronome">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Metronome</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Visual Pulse Circle -->
+        <div class="pulse-section">
+            <div class="pulse-circle" id="pulseCircle">
+                <div class="pulse-inner"></div>
+            </div>
+        </div>
+
+        <!-- Time/Subdiv/Sound Controls -->
+        <div class="controls-row">
+            <div class="control-group">
+                <label>Time</label>
+                <select id="timeSignature" class="control-select">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Subdiv</label>
+                <select id="subdivision" class="control-select">
+                    <option value="0.25">Quarter</option>
+                    <option value="0.5">Eighth</option>
+                    <option value="0.333">Triplet</option>
+                    <option value="0.125">Sixteenth</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Sound</label>
+                <select id="clickSound" class="control-select">
+                    <option value="classic">Classic</option>
+                    <option value="rimShot">Rim Shot</option>
+                    <option value="woodblock">Woodblock</option>
+                    <option value="stick">Stick</option>
+                    <option value="electronic">Electronic</option>
+                    <option value="bell">Bell</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- BPM Display and Controls -->
+        <div class="bpm-section">
+            <div class="bpm-controls">
+                <button class="bpm-button" id="decrementBPM" aria-label="Decrease BPM">
+                    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                        <circle cx="18" cy="18" r="18" fill="#007AFF"/>
+                        <path d="M12 18H24" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="bpm-display">
+                    <div class="bpm-number" id="bpmValue">120</div>
+                    <div class="bpm-label">BPM</div>
+                </div>
+                <button class="bpm-button" id="incrementBPM" aria-label="Increase BPM">
+                    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                        <circle cx="18" cy="18" r="18" fill="#007AFF"/>
+                        <path d="M18 12V24M12 18H24" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tempo Slider -->
+        <div class="slider-section">
+            <input type="range" id="bpmSlider" min="30" max="300" value="120" class="bpm-slider">
+            <div class="slider-labels">
+                <span>30</span>
+                <span>300</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-button tap-button" id="tapTempo">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 2V6M10 14V18M6 10H2M18 10H14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="10" cy="10" r="3" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+                <span>Tap</span>
+            </button>
+            <button class="action-button start-button" id="startStop">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" id="playIcon">
+                    <circle cx="11" cy="11" r="11" fill="currentColor"/>
+                    <path d="M9 7L15 11L9 15V7Z" fill="white"/>
+                </svg>
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" id="stopIcon" style="display: none;">
+                    <circle cx="11" cy="11" r="11" fill="currentColor"/>
+                    <rect x="8" y="8" width="6" height="6" fill="white" rx="1"/>
+                </svg>
+                <span id="startStopText">Start</span>
+            </button>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings-section">
+            <div class="toggles">
+                <div class="toggle-row">
+                    <label>Accent</label>
+                    <label class="switch">
+                        <input type="checkbox" id="accentToggle">
+                        <span class="slider-switch"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <label>Sound</label>
+                    <label class="switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="slider-switch"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <label>Haptics</label>
+                    <label class="switch">
+                        <input type="checkbox" id="hapticsToggle">
+                        <span class="slider-switch"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="frequency-controls">
+                <div class="frequency-row">
+                    <label>Accent Hz</label>
+                    <select id="accentFrequency" class="frequency-select">
+                        <option value="400">400</option>
+                        <option value="500">500</option>
+                        <option value="600">600</option>
+                        <option value="700">700</option>
+                        <option value="800">800</option>
+                        <option value="900">900</option>
+                        <option value="1000" selected>1,000</option>
+                        <option value="1100">1,100</option>
+                        <option value="1200">1,200</option>
+                        <option value="1400">1,400</option>
+                        <option value="1600">1,600</option>
+                        <option value="1800">1,800</option>
+                        <option value="2000">2,000</option>
+                    </select>
+                </div>
+                <div class="frequency-row">
+                    <label>Beat Hz</label>
+                    <select id="beatFrequency" class="frequency-select">
+                        <option value="400">400</option>
+                        <option value="500">500</option>
+                        <option value="600" selected>600</option>
+                        <option value="700">700</option>
+                        <option value="800">800</option>
+                        <option value="900">900</option>
+                        <option value="1000">1,000</option>
+                        <option value="1100">1,100</option>
+                        <option value="1200">1,200</option>
+                        <option value="1400">1,400</option>
+                        <option value="1600">1,600</option>
+                        <option value="1800">1,800</option>
+                        <option value="2000">2,000</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="metronome-engine.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
+
