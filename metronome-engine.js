@@ -74,10 +74,12 @@ class MetronomeEngine {
         
         // Calculate beat interval
         // subdivision is a multiplier: 1.0 = quarter, 2.0 = eighth, 1.5 = triplet, 4.0 = sixteenth
-        // This represents how many subdivision beats fit in one quarter note
-        const quarterNotesPerSecond = this.bpm / 60.0;
-        const subdivisionBeatsPerSecond = quarterNotesPerSecond * this.subdivision;
-        this.beatInterval = 1.0 / subdivisionBeatsPerSecond;
+        // This matches iOS: beatsPerSecond = (BPM / 60.0) * subdivision.multiplier
+        const beatsPerSecond = (this.bpm / 60.0) * this.subdivision;
+        this.beatInterval = 1.0 / beatsPerSecond;
+        
+        // Debug logging
+        console.log(`🎵 Starting metronome: BPM=${this.bpm}, subdivision=${this.subdivision}, beatsPerSecond=${beatsPerSecond.toFixed(2)}, interval=${this.beatInterval.toFixed(3)}s`);
         
         // Get current time and schedule immediate click
         const currentTime = this.audioContext.currentTime;
@@ -283,10 +285,9 @@ class MetronomeEngine {
     updateBPM(newBPM) {
         this.bpm = newBPM;
         if (this.isPlaying) {
-            // Recalculate beat interval
-            const quarterNotesPerSecond = this.bpm / 60.0;
-            const subdivisionBeatsPerSecond = quarterNotesPerSecond * this.subdivision;
-            this.beatInterval = 1.0 / subdivisionBeatsPerSecond;
+            // Recalculate beat interval (matches iOS calculation)
+            const beatsPerSecond = (this.bpm / 60.0) * this.subdivision;
+            this.beatInterval = 1.0 / beatsPerSecond;
             // Don't reset beatNumber - preserve measure position
         }
     }
